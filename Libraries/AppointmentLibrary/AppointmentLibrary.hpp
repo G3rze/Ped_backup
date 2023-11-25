@@ -32,6 +32,8 @@ struct AppointmentNode{
     AppointmentNode *next = nullptr, *prev = nullptr;
 };
 
+bool IsFull();
+
 bool IsPending(Patient *);
 
 void ShowCalendar();

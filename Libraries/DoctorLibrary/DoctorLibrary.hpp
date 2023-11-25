@@ -14,23 +14,30 @@ struct Doctor{
     string name;
     string specialty;
 };
+struct DoctorNode{
+    Doctor*doctor;
+    DoctorNode *next = nullptr, *prev = nullptr;
+};
 
-void DoctorMenu();
 
-void DoctorLogin(string);
+void DoctorMenu(Doctor *);
 
-void DoctorLogOut();
+DoctorNode *GetDoctorList();
 
-void CreateNewPatient();
+Doctor *GetDoctorByUsername(string);
 
-void DeletePatient();
+void CreateNewPatient(Doctor *);
 
-void AttendPatient();
+void DeletePatient(Doctor *);
 
-void ShowAttendedAppointments();
+void AttendPatient(Doctor *);
 
-void NewDoctorRegistration(string username, string password);
+void ShowAttendedAppointments(Doctor *);
 
-Doctor *NewDoctor(string, string);
+void NewDoctorRegistration(Doctor *);
+
+Doctor *NewDoctor(User*);
+
+
 
 #endif

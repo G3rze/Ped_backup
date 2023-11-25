@@ -7,27 +7,68 @@
 
 using namespace std;
 
-Doctor *doctor = new Doctor;
+DoctorNode* doctorList = nullptr;
 
-void DoctorMenu(){
+
+DoctorNode*GetDoctorList(){
+
+    return doctorList;
+}
+
+void DoctorMenu(Doctor*doctor){
     int option;
-}
+    while (option != 5) {
+        cout << "Que acci" << GetLatinChar().o << "n desea realizar: \n"
+             << "1- Crear Paciente \n"
+             << "2- Atender Paciente \n"
+             << "3- Eliminar paciente \n"
+             << "4- Mostrar lista citas atendidas \n"
+             << "5- Cerrar Sesi" << GetLatinChar().o << "n \n";
+        cin >> option;
 
-void DoctorLogin(string username){
-    if(!GetIsLogged()){
-        doctor->name = username;
-        doctor->user->username = username;
-        SetIsLogged(true);
+        switch (option) {
+            case 1:
+                CreateNewPatient(doctor);
+                break;
+            case 2:
+                AttendPatient(doctor);
+                break;
+            case 3:
+                DeletePatient(doctor);
+                break;
+            case 4:
+                ShowAttendedAppointments(doctor);
+                break;
+            case 5:
+                doctor = nullptr;
+                break;
+            default:
+                cout << Red("ERROR: Opci") << Red(GetLatinChar().o) << Red("n desconocida \n");
+                break;
+        }
     }
 }
 
-void DoctorLogOut(){
-    if(GetIsLogged()){
-        SetIsLogged(false);
+
+Doctor *GetDoctorByUsername(string username){
+
+    Doctor *doctor = nullptr;
+    DoctorNode *aux = GetDoctorList();
+    while (aux) {
+        if (aux->doctor->user->username == username) {
+            doctor = aux->doctor;
+            SetIsLogged(true);
+            break;
+        }
+        aux = aux->next;
     }
+
+    return doctor;
 }
 
-void CreateNewPatient(){
+
+
+void CreateNewPatient(Doctor *doctor){
     if(GetIsLogged()){
         string patientUsername, patientPassword;
 
@@ -38,11 +79,11 @@ void CreateNewPatient(){
         cout<<"Ingrese la contrase"<<GetLatinChar().n<<"a del nuevo paciente: ";
         cin>>patientPassword;
 
-        NewPatientRegistrarion(NewPatient(CreateAccount(false, patientUsername, patientPassword)));
+        NewPatientRegistration(NewPatient(CreateAccount(false, patientUsername, patientPassword)));
     }
 }
 
-void DeletePatient(){
+void DeletePatient(Doctor *doctor){
     if(GetIsLogged()){
         string patientUsername;
 
@@ -53,27 +94,41 @@ void DeletePatient(){
     }
 }
 
-void AttendPatient(){
+void AttendPatient(Doctor *doctor){
     if(GetIsLogged()){
         ShowDoctorAppointments(false);
     }
 }
 
-void ShowAttendedAppointments(){
+void ShowAttendedAppointments(Doctor *doctor){
     if(GetIsLogged()){
         ShowDoctorAppointments(true);
     }
 }
 
-void NewDoctorRegistration(string username, string password){
+void NewDoctorRegistration(Doctor *doctor){
 
-    string newDoctorPath = DOCTOR_DATA_PATH + "/" + username;
-    string newDoctorInfoPath = newDoctorPath + "/" + username + "Info.txt";
-    Doctor *doctor = nullptr;
+    string newDoctorPath = DOCTOR_DATA_PATH + "/" + doctor->user->username;
+    string newDoctorInfoPath = newDoctorPath + "/" + doctor->user->username + "Info.txt";
+
+    DoctorNode *newDoctorNode = new DoctorNode;
+    DoctorNode *aux = GetDoctorList();
+
+    newDoctorNode->doctor = doctor;
+
+    if(aux){
+        while (aux->next) {
+            aux = aux->next;
+        }
+        newDoctorNode->prev = aux;
+        aux->next = newDoctorNode;
+    } else {
+        doctorList = newDoctorNode;
+    }
 
     if(!filesystem::exists(newDoctorPath)){
         filesystem::create_directory(newDoctorPath);
-        doctor = NewDoctor(username, password);
+
 
         ofstream outfile(newDoctorInfoPath);
         if(outfile.is_open()){
@@ -87,7 +142,7 @@ void NewDoctorRegistration(string username, string password){
     }
 }
 
-Doctor *NewDoctor(string username, string password){
+Doctor *NewDoctor(User*user){
     Doctor *newDoctor = new Doctor;
     cout<<"Ingrese el nombre del nuevo doctor \n";
     cout<<"Nombre: ";
@@ -99,6 +154,7 @@ Doctor *NewDoctor(string username, string password){
     cin.get();
     getline(cin, newDoctor->specialty);
 
-    newDoctor->user = CreateAccount(true, username, password);
+    newDoctor->user = user;
+
     return newDoctor;
 }

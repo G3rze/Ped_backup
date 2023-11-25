@@ -14,8 +14,7 @@ bool IsPending(Patient *patient){
     AppointmentNode *aux = GetAppointmentList();
 
     while (aux){
-        if(aux->appointment->doctorAppointment->patient->name == patient->name && aux->appointment->isAttended){
-            cout<<aux->appointment->doctorAppointment->patient->name<<"\n";
+        if(aux->appointment->doctorAppointment->patient->name == patient->name && !aux->appointment->isAttended){
             break;
         }
         aux = aux->next;
@@ -23,7 +22,7 @@ bool IsPending(Patient *patient){
     if(aux){
         return true;
     } else {
-    return false;
+        return false;
     }
 }
 
@@ -38,7 +37,7 @@ void ShowCalendar() {
     //int thisMonth = now->tm_mon + 1;
 
 // Calcular el día de la semana del primer día del mes actual
-    int primerDiaMes = (now->tm_wday - (now->tm_mday - 2) % 7 + 7) % 7;
+    int primerDiaMes = (now->tm_wday - now->tm_mday % 7 + 7) % 7;
 
 // Ajustar para iniciar desde el primer día de la semana
     t -= primerDiaMes * 24 * 60 * 60; // Restar días para llegar al primer día de la semana

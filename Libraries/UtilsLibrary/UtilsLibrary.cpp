@@ -55,7 +55,7 @@ void MainMenu(){
                     cin >> organizationCode;
 
                     if (organizationCode == ORGANIZATION_CODE) {
-                        NewDoctorRegistration(username, password);
+                        NewDoctorRegistration(NewDoctor(CreateAccount(true,username,password)));
                     } else {
                         cout << Red("ERROR: Codigo de acceso invalido, contacte a su organizaci")
                              << Red(GetLatinChar().o) << Red("n para m") << Red(GetLatinChar().a) << Red("s informaci")
@@ -63,7 +63,7 @@ void MainMenu(){
                              << "\n";
                     }
                 } else {
-                    NewPatientRegistrarion(NewPatient(CreateAccount(false, username, password)));
+                    NewPatientRegistration(NewPatient(CreateAccount(false, username, password)));
                 }
                 break;
             case 3:

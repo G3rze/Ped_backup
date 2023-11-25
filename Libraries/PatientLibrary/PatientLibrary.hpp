@@ -30,7 +30,7 @@ void ShowMedicalRecords(Patient *);
 
 void DeleteMyAccount(Patient *);
 
-void NewPatientRegistrarion(Patient *);
+void NewPatientRegistration(Patient *);
 
 Patient *NewPatient(User *);
 

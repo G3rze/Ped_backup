@@ -105,7 +105,7 @@ void DeleteMyAccount(Patient *patient){
 }
 
 
-void NewPatientRegistrarion(Patient *patient){
+void NewPatientRegistration(Patient *patient){
     string newPatientPath = PATIENT_DATA_PATH + "/" + patient->user->username;
     string newPatientInfoPath = newPatientPath + "/" + patient->user->username + "Info.txt";
 

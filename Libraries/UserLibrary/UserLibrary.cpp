@@ -42,8 +42,7 @@ bool GetIsLogged(){
 void Login(string username, string password){
     if(CredentialCheck(username, password)){
         if (username.find(ORGANIZATION_EMAIL) != string::npos) {
-            DoctorLogin(username);
-            DoctorMenu();
+            DoctorMenu(GetDoctorByUsername(username));
         } else {
             PatientMenu(GetPatientByUsername(username));
         }
