@@ -3,10 +3,15 @@
 #include <fstream>
 
 #include "DoctorLibrary.hpp"
+#include "../UtilsLibrary/UtilsLibrary.hpp"
 
 using namespace std;
 
 Doctor *doctor = new Doctor;
+
+void DoctorMenu(){
+    int option;
+}
 
 void DoctorLogin(string username){
     if(!GetIsLogged()){
@@ -30,10 +35,10 @@ void CreateNewPatient(){
         cin.get();
         cin>>patientUsername;
 
-        cout<<"Ingrese la contraseña del nuevo paciente: ";
+        cout<<"Ingrese la contrase"<<GetLatinChar().n<<"a del nuevo paciente: ";
         cin>>patientPassword;
 
-        NewPatientRegistrarion(patientUsername, patientPassword);
+        NewPatientRegistrarion(NewPatient(CreateAccount(false, patientUsername, patientPassword)));
     }
 }
 

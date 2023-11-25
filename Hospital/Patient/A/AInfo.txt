@@ -1,0 +1,2 @@
+Nombre: A
+Edad: 45

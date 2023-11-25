@@ -15,6 +15,8 @@ struct Doctor{
     string specialty;
 };
 
+void DoctorMenu();
+
 void DoctorLogin(string);
 
 void DoctorLogOut();

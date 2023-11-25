@@ -2,6 +2,7 @@
 #define APPOINTMET_LIBRARY_HPP
 
 #include "../UtilsLibrary/UtilsLibrary.hpp"
+#include "../PatientLibrary/PatientLibrary.hpp"
 
 using namespace std;
 
@@ -14,8 +15,7 @@ struct PatientAppointment{
 
 struct DoctorAppointment{
     string date;
-    int patientAge;
-    string patientName;
+    Patient *patient;
     string medicalPrescription;
     string suffering;
 };
@@ -32,9 +32,13 @@ struct AppointmentNode{
     AppointmentNode *next = nullptr, *prev = nullptr;
 };
 
+bool IsPending(Patient *);
+
+void ShowCalendar();
+
 AppointmentNode *GetAppointmentList();
 
-Appointment *NewAppointment(string, string, string, int);
+Appointment *NewAppointment(Patient *, string, string);
 
 void RegisterPatientAppointment(Appointment *);
 

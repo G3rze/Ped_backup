@@ -13,13 +13,21 @@ struct User{
     bool isAdmin;
 };
 
+struct UserNode{
+    User *user;
+    UserNode *next = nullptr;
+};
+
+bool CredentialCheck(string, string);
+
+UserNode *GetUserList();
+
 void SetIsLogged(bool);
 
 bool GetIsLogged();
 
 void Login(string username, string password);
 
-void SignOut();
 
 User *CreateAccount(bool ,string ,string);
 

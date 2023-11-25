@@ -2,9 +2,6 @@
 #define PATIENT_LIBRARY_HPP
 
 #include "../UserLibrary/UserLibrary.hpp"
-#include "../../Constant/Constant.hpp"
-#include "../UtilsLibrary/UtilsLibrary.hpp"
-#include "../AppointmentLibrary/AppointmentLibrary.hpp"
 
 using namespace std;
 
@@ -14,20 +11,27 @@ struct Patient{
     int age;
 };
 
-void PatientLogin(string);
+struct PatientNode{
+    Patient *patient;
+    PatientNode *next = nullptr, *prev = nullptr;
+};
 
-void CreateAppointment();
+PatientNode *GetPatientList();
 
-void CancelAppointment();
+Patient *GetPatientByUsername(string);
 
-void ShowMedicalRecords();
+void PatientMenu(Patient *);
 
-void DeleteMyAccount();
+void CreateAppointment(Patient *);
 
-void PatientLogOut();
+void CancelAppointment(Patient *);
 
-void NewPatientRegistrarion(string username, string password);
+void ShowMedicalRecords(Patient *);
 
-Patient *NewPatient(string, string);
+void DeleteMyAccount(Patient *);
+
+void NewPatientRegistrarion(Patient *);
+
+Patient *NewPatient(User *);
 
 #endif

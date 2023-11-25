@@ -3,57 +3,130 @@
 #include <fstream>
 
 #include "PatientLibrary.hpp"
-Patient *patient = new Patient;
+#include "../UtilsLibrary/UtilsLibrary.hpp"
+#include "../AppointmentLibrary/AppointmentLibrary.hpp"
+#include "../../Constant/Constant.hpp"
 
-void PatientLogin(string username){
-    if(GetIsLogged()) {
-        patient->name = username;
-        patient->user->username = username;
-        SetIsLogged(true);
+PatientNode *patientList = nullptr;
+PatientNode *GetPatientList(){
+    return patientList;
+}
+
+
+void PatientMenu(Patient *patient){
+    int option = 0;
+    while (option != 5) {
+        cout << "Que acci" << GetLatinChar().o << "n desea realizar: \n"
+             << "1- Agendar una cita \n"
+             << "2- Cancelar una cita \n"
+             << "3- Mostrar historial medico \n"
+             << "4- Borrar mi cuenta \n"
+             << "5- Cerrar Sesi" << GetLatinChar().o << "n \n";
+        cin >> option;
+
+        switch (option) {
+            case 1:
+                CreateAppointment(patient);
+                break;
+            case 2:
+                CancelAppointment(patient);
+                break;
+            case 3:
+                ShowMedicalRecords(patient);
+                break;
+            case 4:
+                DeleteMyAccount(patient);
+                break;
+            case 5:
+                patient = nullptr;
+                break;
+            default:
+                cout << Red("ERROR: Opci") << Red(GetLatinChar().o) << Red("n desconocida \n");
+                break;
+        }
     }
 }
 
-void CreateAppointment(){
+Patient *GetPatientByUsername(string username){
+
+    Patient *patient = nullptr;
+    PatientNode *aux = GetPatientList();
+    while (aux) {
+        if (aux->patient->user->username == username) {
+            patient = aux->patient;
+            SetIsLogged(true);
+            break;
+        }
+        aux = aux->next;
+    }
+
+    return patient;
+}
+
+void CreateAppointment(Patient * patient){
     string date, suffering;
 
     if(GetIsLogged()) {
-        NewAppointment(patient->name, date, suffering, patient->age);
+        if(!IsPending(patient)){
+            ClearConsole();
+            ShowCalendar();
+            cout << "Ingresar la fecha de la cita en el formato dd/mm/yy: ";
+            cin >> date;
+
+            cout << "Ingresar el padecimiendo: ";
+            cin >> suffering;
+
+            RegisterPatientAppointment(NewAppointment(patient, date, suffering));
+        } else {
+            cout<<Red("ERROR: USTED YA TIENE AGENDADA UNA CITA PENDIENTE \n");
+        }
     }
 }
 
-void CancelAppointment(){
+void CancelAppointment(Patient *patient){
     if(GetIsLogged()) {
+        ClearConsole();
         DeletePatientAppointment(patient->user->username);
     }
 }
 
-void ShowMedicalRecords(){
+void ShowMedicalRecords(Patient *patient){
     if(GetIsLogged()) {
+        ClearConsole();
         ShowPatientAppointments(true);
     }
 }
 
-void DeleteMyAccount(){
+void DeleteMyAccount(Patient *patient){
     if(GetIsLogged()) {
+        ClearConsole();
         DeleteAccount(patient->user->username);
     }
 }
 
-void PatientLogOut(){
-    if(GetIsLogged()){
-        SetIsLogged(false);
-    }
-}
 
-void NewPatientRegistrarion(string username, string password){
-    string newPatientPath = PATIENT_DATA_PATH + "/" + username;
-    string newPatientInfoPath = newPatientPath + "/" + username + "Info.txt";
-    Patient *patient = nullptr;
+void NewPatientRegistrarion(Patient *patient){
+    string newPatientPath = PATIENT_DATA_PATH + "/" + patient->user->username;
+    string newPatientInfoPath = newPatientPath + "/" + patient->user->username + "Info.txt";
+
+    PatientNode *newPatientNode = new PatientNode;
+    PatientNode *aux = GetPatientList();
+
+    newPatientNode->patient = patient;
+
+    if(aux){
+        while (aux->next) {
+            aux = aux->next;
+        }
+        newPatientNode->prev = aux;
+        aux->next = newPatientNode;
+    } else {
+        patientList = newPatientNode;
+    }
+
 
     if(!filesystem::exists(newPatientPath)){
         filesystem::create_directory(newPatientPath);
-        patient = NewPatient(username, password);
-
         ofstream outfile(newPatientInfoPath);
         if(outfile.is_open()){
             outfile<<"Nombre: "<<patient->name<<"\n"
@@ -66,7 +139,7 @@ void NewPatientRegistrarion(string username, string password){
     }
 }
 
-Patient *NewPatient (string username, string password){
+Patient *NewPatient (User *user){
     Patient *newPatient = new Patient;
     cout<<"Ingrese el nombre del nuevo paciente"<<"\n";
     cout<<"Nombre: ";
@@ -77,6 +150,6 @@ Patient *NewPatient (string username, string password){
     cout<<"Edad: ";
     cin>>newPatient->age;
 
-    newPatient->user = CreateAccount(false, username, password);
+    newPatient->user = user;
     return newPatient;
 }

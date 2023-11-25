@@ -25,6 +25,10 @@ struct LatinChar{
     string n = "\xF1";
 };
 
+void MainMenu();
+
+LatinChar GetLatinChar();
+
 string Red(string);
 string Green(string);
 string Yellow(string);
