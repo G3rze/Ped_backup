@@ -1,2 +1,0 @@
-Nombre: g
-Edad: 45

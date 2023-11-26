@@ -1,2 +1,0 @@
-Nombre: y
-Edad: 45

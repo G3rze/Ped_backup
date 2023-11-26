@@ -1,2 +1,0 @@
-Nombre: r
-Edad: 56
