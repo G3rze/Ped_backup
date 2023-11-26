@@ -3,11 +3,7 @@
 #include <filesystem>
 #include <fstream>
 
-
-#include "Libraries/DoctorLibrary/DoctorLibrary.hpp"
-#include "Libraries/PatientLibrary/PatientLibrary.hpp"
 #include "Libraries/UtilsLibrary/UtilsLibrary.hpp"
-#include "Libraries/AppointmentLibrary/AppointmentLibrary.hpp"
 #include "Constant/Constant.hpp"
 
 using namespace std;
@@ -17,8 +13,8 @@ void LoadDataFiles();
 
 int main(){
     setlocale(LC_CTYPE, "spanish");
-    LoadDataFiles();
     LoadDirectories();
+    LoadDataFiles();
     MainMenu();
     return 0;
 }
@@ -42,9 +38,6 @@ void LoadDirectories(){
 }
 
 void LoadDataFiles(){
-    if(!filesystem::exists(SUFFERING_DATABASE_PATH)){
-        ofstream sufferingDatabaseFile(SUFFERING_DATABASE_PATH);
-    }
     if(!filesystem::exists(PENDING_APPOINTMENTS_PATH)){
         ofstream pendingAppointmentsFile(PENDING_APPOINTMENTS_PATH);
     }

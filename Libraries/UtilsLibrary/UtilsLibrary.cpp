@@ -7,6 +7,7 @@
 LatinChar latinChar;
 
 void MainMenu(){
+    bool userExist;
     int option = 0;
     while(option != 3){
         ClearConsole();
@@ -43,11 +44,17 @@ void MainMenu(){
                     cout << Yellow("Confirmar Contrase") << Yellow(GetLatinChar().n) << Yellow("a: ");
                     cin >> passwordConfirmation;
 
+                    userExist = UserExist(username);
+
                     if (password != passwordConfirmation) {
                         ClearConsole();
                         cout << Red("ERROR: Contrase") << Red(GetLatinChar().n) << Red("as distintas") << "\n";
                     }
-                } while (password != passwordConfirmation);
+                    if (UserExist(username)){
+                        ClearConsole();
+                        cout << Red("ERROR: Usuario ya existente \n");
+                    }
+                } while (password != passwordConfirmation || UserExist(username));
 
                 if (username.find(ORGANIZATION_EMAIL) != string::npos) {
                     cout << Yellow("Ingrese el codigo de su organizaci") << Yellow(GetLatinChar().o) << Yellow("n")

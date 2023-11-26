@@ -11,7 +11,6 @@ static const string DATACENTER_DIRECTORY_PATH = ROOT_PATH + "/DataCenter";
 static const string CREDENTIALS_PATH = DATACENTER_DIRECTORY_PATH + "/Credentials";
 static const string DOCTOR_DATA_PATH = ROOT_PATH + "/Doctor";
 static const string PATIENT_DATA_PATH = ROOT_PATH + "/Patient";
-static const string SUFFERING_DATABASE_PATH = DATACENTER_DIRECTORY_PATH + "/SufferingDatabase.txt";
 static const string PENDING_APPOINTMENTS_PATH = DATACENTER_DIRECTORY_PATH + "/PendingAppointments.txt";
 static const string PATIENT_CREDENTIAL_PATH = CREDENTIALS_PATH + "/PatientCredentials.txt";
 static const string DOCTOR_CREDENTIAL_PATH = CREDENTIALS_PATH + "/DoctorCredentials.txt";

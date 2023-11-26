@@ -34,4 +34,6 @@ void NewPatientRegistration(Patient *);
 
 Patient *NewPatient(User *);
 
+void DeletePatientByUsername(string);
+
 #endif

@@ -1,8 +1,11 @@
 #include <iostream>
 #include <iomanip>
 #include <ctime>
+#include <fstream>
+#include <filesystem>
 
 #include "AppointmentLibrary.hpp"
+#include "../../Constant/Constant.hpp"
 
 using namespace std;
 
@@ -10,11 +13,33 @@ const int numCitas = 28; // 4 semanas * 7 días
 
 AppointmentNode *appointmentList = nullptr;
 
+bool IsFull(string date){
+
+    int count = 0;
+
+    AppointmentNode *aux = appointmentList;
+
+    while(aux){
+
+        if(date == aux->appointment->patientAppointment->date){
+            count++;
+        }
+
+        aux = aux->next;
+    }
+
+    if (count == 3) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool IsPending(Patient *patient){
-    AppointmentNode *aux = GetAppointmentList();
+    AppointmentNode *aux = appointmentList;
 
     while (aux){
-        if(aux->appointment->doctorAppointment->patient->name == patient->name && !aux->appointment->isAttended){
+        if(aux->appointment->doctorAppointment->patient->user->username == patient->user->username && !aux->appointment->isAttended){
             break;
         }
         aux = aux->next;
@@ -24,6 +49,8 @@ bool IsPending(Patient *patient){
     } else {
         return false;
     }
+
+
 }
 
 void ShowCalendar() {
@@ -31,16 +58,18 @@ void ShowCalendar() {
     time_t t = time(0);
     tm* now = localtime(&t);
 
-    // Obtener el día de hoy
     int today = now->tm_mday;
 
-    //int thisMonth = now->tm_mon + 1;
+    int weekDay = now->tm_wday;
 
-// Calcular el día de la semana del primer día del mes actual
-    int primerDiaMes = (now->tm_wday - now->tm_mday % 7 + 7) % 7;
+    if(weekDay == 0){
+        weekDay = 6;
+    } else {
+        weekDay--;
+    }
 
 // Ajustar para iniciar desde el primer día de la semana
-    t -= primerDiaMes * 24 * 60 * 60; // Restar días para llegar al primer día de la semana
+    t -= weekDay * 24 * 60 * 60; // Restar días para llegar al primer día de la semana
     now = localtime(&t);
 
     // Imprimir encabezado con nombres de los días
@@ -51,12 +80,11 @@ void ShowCalendar() {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 7; ++j) {
             int count = 0;
-            // Obtener el número del día del mes
+
             int day = now->tm_mday;
 
-            // Imprimir 'H' si el día es el día de hoy, de lo contrario, imprimir el número del día
             if(day != today){
-                AppointmentNode *aux = GetAppointmentList();
+                AppointmentNode *aux = appointmentList;
 
                 while (aux){
                     size_t found = aux->appointment->patientAppointment->date.find("/");
@@ -95,7 +123,7 @@ AppointmentNode *GetAppointmentList() {
     return appointmentList;
 }
 
-Appointment *NewAppointment(Patient *patient, string date, string suffering){
+Appointment *NewAppointment(Patient *patient, string date, string suffering, int priority){
     Appointment *newAppointment = new Appointment;
     DoctorAppointment *newDoctorAppointment = new DoctorAppointment;
     PatientAppointment *newPatientAppointment = new PatientAppointment;
@@ -111,6 +139,7 @@ Appointment *NewAppointment(Patient *patient, string date, string suffering){
 
     newAppointment->patientAppointment = newPatientAppointment;
     newAppointment->doctorAppointment = newDoctorAppointment;
+    newAppointment->priority = priority;
 
     return newAppointment;
 }
@@ -126,26 +155,27 @@ void RegisterPatientAppointment(Appointment *newApointment){
         appointmentList = newNode;
     } else {
         AppointmentNode *aux = appointmentList;
-        id = 1;
         while(aux->next){
             id++;
             aux = aux->next;
         }
-        newNode->appointment->id = id;
+        newNode->appointment->id = aux->appointment->id + 1;
         newNode->prev = aux;
         aux->next = newNode;
     }
+
+    FillPendingAppointments();
 }
 
-void UpdateAppointment(string doctorName, int id){
-    AppointmentNode *aux = GetAppointmentList();
+void UpdateAppointment(Doctor *doctor, int id){
+    AppointmentNode *aux = appointmentList;
 
     while (aux && aux->appointment->id != id){
         aux = aux->next;
     }
 
     if (aux->appointment->id == id){
-        aux->appointment->patientAppointment->doctorName = doctorName;
+        aux->appointment->patientAppointment->doctorName = doctor->name;
         cout<<"Escriba el proceso medico: ";
         cin.get();
         getline(cin, aux->appointment->doctorAppointment->medicalPrescription);
@@ -154,18 +184,171 @@ void UpdateAppointment(string doctorName, int id){
     } else {
         cout<<Red("ERROR: ID de la cita no encontrado \n");
     }
+    FillPendingAppointments();
+    FillAttendedAppointments(doctor);
+    FillMedicalRecords(aux->appointment->doctorAppointment->patient);
 }
 
-void DeletePatientAppointment(string username){
+void DeletePatientAppointment(Patient *patient){
+    AppointmentNode *aux = appointmentList;
+
+    while(aux){
+
+        if(aux->appointment->doctorAppointment->patient->user->username == patient->user->username && !aux->appointment->isAttended){
+            break;
+        }
+
+        aux = aux->next;
+    }
+    if(aux){
+        if (aux->prev) {
+            appointmentList->prev->next = aux->next;
+
+        } else {
+            appointmentList = aux->next;
+        }
+        if (aux->next){
+            aux->next->prev = aux->prev;
+        } else {
+            appointmentList = nullptr;
+        }
+
+        delete aux;
+    } else {
+        cout<<Red("ERROR: NO HAY CITAS PARA ELIMINAR \n");
+    }
+
+
 
 }
 
 void ShowPatientAppointments(bool isAttended){
+    AppointmentNode *aux = appointmentList;
+    int count = 0;
+    while(aux){
+        if(isAttended){
+            count++;
+            cout << Green("Cita ") << Green(to_string(count)) << "\n";
+            cout << aux->appointment->patientAppointment->date << ", "
+                 << aux->appointment->patientAppointment->suffering << ", "
+                 << aux->appointment->patientAppointment->medicalPrescription << ", "
+                 << aux->appointment->patientAppointment->doctorName << ". \n";
+        }
 
+        aux = aux->next;
+    }
 }
 
 void ShowDoctorAppointments(bool isAttended){
+    int count = 1;
+    AppointmentNode *aux = appointmentList;
+    if (!isAttended){
+        while (count < 4) {
+            aux = appointmentList;
+            while (aux) {
+                    if (aux->appointment->priority == count && !aux->appointment->isAttended) {
+                        cout << Green("ID: ") << Green(to_string(aux->appointment->id)) << "\n";
+                        cout << aux->appointment->doctorAppointment->date << ", "
+                             << aux->appointment->doctorAppointment->patient->age << ", "
+                             << aux->appointment->doctorAppointment->patient->name << ", "
+                             << aux->appointment->doctorAppointment->suffering << ".\n";
+                    }
+                aux = aux->next;
+            }
+            count++;
+        }
+    } else {
+        while(aux){
+            if(aux->appointment->isAttended){
+                cout << Green("ID: ") << Green(to_string(aux->appointment->id)) << "\n";
+                cout << aux->appointment->doctorAppointment->date << ", "
+                     << aux->appointment->doctorAppointment->patient->age << ", "
+                     << aux->appointment->doctorAppointment->patient->name << ", "
+                     << aux->appointment->doctorAppointment->medicalPrescription << ", "
+                     << aux->appointment->doctorAppointment->suffering << ".\n";
+            }
+            aux = aux->next;
+        }
+    }
+}
+
+void FillPendingAppointments(){
+    ofstream file;
+
+    int count = 0;
+
+    file.open(PENDING_APPOINTMENTS_PATH, ::ios::out);
+
+    AppointmentNode *aux = appointmentList;
+
+    while(aux){
+
+        if(!aux->appointment->isAttended){
+            file << "ID: " << aux->appointment->id <<"\n";
+            file << aux->appointment->doctorAppointment->date << ", "
+            << aux->appointment->doctorAppointment->patient->age << ", "
+            << aux->appointment->doctorAppointment->patient->name << ", "
+            << aux->appointment->doctorAppointment->suffering << ".\n";
+        }
+
+        aux = aux->next;
+    }
+
+    file.close();
+}
+
+void FillMedicalRecords(Patient *patient){
+    string PatientPath = PATIENT_DATA_PATH + "/" + patient->user->username;
+    string newPatientMedicalRecordPath = PatientPath + "/" + "HistorialMedico.txt";
+
+    ofstream file;
+
+    file.open(newPatientMedicalRecordPath, ::ios::out);
+
+    AppointmentNode *aux = appointmentList;
+
+    while(aux){
+
+        if(aux->appointment->isAttended){
+            file << "ID: " << aux->appointment->id << "\n";
+            file << aux->appointment->patientAppointment->date << ", "
+            << aux->appointment->patientAppointment->suffering << ", "
+            << aux->appointment->patientAppointment->medicalPrescription << ", "
+            << aux->appointment->patientAppointment->doctorName << ".\n";
+        }
+
+        aux = aux->next;
+    }
+
+    file.close();
 
 }
 
+void FillAttendedAppointments(Doctor *doctor){
+    string doctorPath = DOCTOR_DATA_PATH + "/" + doctor->user->username;
+    string doctorAttendedAppointmentPath = doctorPath + "/" + "CitasAtendidas.txt";
 
+    ofstream file;
+
+    file.open(doctorAttendedAppointmentPath, ::ios::out);
+
+    if(file.is_open()){
+        AppointmentNode *aux = appointmentList;
+
+        while (aux) {
+
+            if (aux->appointment->isAttended) {
+                file << "ID: " << aux->appointment->id << "\n";
+                file << aux->appointment->doctorAppointment->date << ", "
+                     << aux->appointment->doctorAppointment->patient->age << ", "
+                     << aux->appointment->doctorAppointment->patient->name << ", "
+                     << aux->appointment->doctorAppointment->medicalPrescription << ", "
+                     << aux->appointment->doctorAppointment->suffering << ".\n";
+            }
+
+            aux = aux->next;
+        }
+    }
+
+    file.close();
+}

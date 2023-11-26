@@ -3,6 +3,7 @@
 
 #include "../UtilsLibrary/UtilsLibrary.hpp"
 #include "../PatientLibrary/PatientLibrary.hpp"
+#include "../DoctorLibrary/DoctorLibrary.hpp"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ struct DoctorAppointment{
 
 struct Appointment{
     int id;
+    int priority;
     bool isAttended;
     PatientAppointment *patientAppointment;
     DoctorAppointment *doctorAppointment;
@@ -32,7 +34,7 @@ struct AppointmentNode{
     AppointmentNode *next = nullptr, *prev = nullptr;
 };
 
-bool IsFull();
+bool IsFull(string);
 
 bool IsPending(Patient *);
 
@@ -40,16 +42,22 @@ void ShowCalendar();
 
 AppointmentNode *GetAppointmentList();
 
-Appointment *NewAppointment(Patient *, string, string);
+Appointment *NewAppointment(Patient *, string, string, int);
 
 void RegisterPatientAppointment(Appointment *);
 
-void UpdateAppointment(string, int);
+void UpdateAppointment(Doctor *, int);
 
-void DeletePatientAppointment(string);
+void DeletePatientAppointment(Patient *);
 
 void ShowPatientAppointments(bool);
 
 void ShowDoctorAppointments(bool);
+
+void FillPendingAppointments();
+
+void FillMedicalRecords(Patient *);
+
+void FillAttendedAppointments(Doctor *);
 
 #endif

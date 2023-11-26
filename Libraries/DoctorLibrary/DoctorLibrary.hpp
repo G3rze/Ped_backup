@@ -4,18 +4,18 @@
 #include "../UserLibrary/UserLibrary.hpp"
 #include "../../Constant/Constant.hpp"
 #include "../UtilsLibrary/UtilsLibrary.hpp"
-#include "../AppointmentLibrary/AppointmentLibrary.hpp"
 #include "../PatientLibrary/PatientLibrary.hpp"
 
 using namespace std;
 
 struct Doctor{
+    int userID;
     User *user;
     string name;
     string specialty;
 };
 struct DoctorNode{
-    Doctor*doctor;
+    Doctor *doctor;
     DoctorNode *next = nullptr, *prev = nullptr;
 };
 

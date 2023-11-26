@@ -11,8 +11,27 @@ UserNode *userList = nullptr;
 
 bool isLogged = false;
 
+bool UserExist(string username){
+    UserNode *aux = userList;
+
+    while (aux){
+
+        if(aux->user->username == username){
+            break;
+        }
+
+        aux = aux->next;
+    }
+
+    if(aux){
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool CredentialCheck(string username, string password){
-    UserNode *aux = GetUserList();
+    UserNode *aux = userList;
     while (aux){
         if(aux->user->username == username && aux->user->password == password){
             break;
@@ -80,11 +99,29 @@ User *CreateAccount(bool isAdmin, string username, string password){
     } else {
         credentialFile.open(DOCTOR_CREDENTIAL_PATH, ios::app);
     }
-    credentialFile << username <<","<< password;
+    credentialFile << username <<","<< password <<"\n";
 
     return newUser;
 }
 
-void DeleteAccount(string username){
+void DeleteAccount(string username) {
+    while (userList != nullptr && userList->user->username == username) {
+        UserNode *aux= userList;
+        userList = userList->next;
+        delete aux;
+    }
+
+    UserNode *aux = userList;
+
+    while (aux != nullptr && aux->next != nullptr) {
+        if (aux->next->user->username == username) {
+            UserNode *aux1 = aux->next;
+            aux->next = aux->next->next;
+            delete aux1;
+        } else {
+            aux = aux->next;
+        }
+    }
+
 
 }

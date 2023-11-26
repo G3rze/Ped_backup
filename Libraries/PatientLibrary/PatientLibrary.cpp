@@ -8,6 +8,7 @@
 #include "../../Constant/Constant.hpp"
 
 PatientNode *patientList = nullptr;
+
 PatientNode *GetPatientList(){
     return patientList;
 }
@@ -35,7 +36,9 @@ void PatientMenu(Patient *patient){
                 ShowMedicalRecords(patient);
                 break;
             case 4:
-                DeleteMyAccount(patient);
+                DeletePatientByUsername(patient->user->username);
+                patient = nullptr;
+                option = 5;
                 break;
             case 5:
                 patient = nullptr;
@@ -65,18 +68,32 @@ Patient *GetPatientByUsername(string username){
 
 void CreateAppointment(Patient * patient){
     string date, suffering;
+    int priority;
 
     if(GetIsLogged()) {
         if(!IsPending(patient)){
+            bool isFull;
             ClearConsole();
             ShowCalendar();
-            cout << "Ingresar la fecha de la cita en el formato dd/mm/yy: ";
-            cin >> date;
+            do{
+                cout << "Ingresar la fecha de la cita en el formato dd/mm/yy: ";
+                cin >> date;
 
-            cout << "Ingresar el padecimiendo: ";
-            cin >> suffering;
+                cout << "Raz"<<GetLatinChar().o<<"n de la cita (Consulta 1), (Ex"<<GetLatinChar().a<<"menes m"<<GetLatinChar().e<<"dicos 2), (Cirug"<<GetLatinChar().i<<"a 3): ";
+                cin >> priority;
 
-            RegisterPatientAppointment(NewAppointment(patient, date, suffering));
+                cout << "Ingrese los s"<<GetLatinChar().i<<"ntomas: ";
+                cin.get();
+                getline(cin, suffering);
+
+                isFull = IsFull(date);
+
+                if(!isFull) {
+                    RegisterPatientAppointment(NewAppointment(patient, date, suffering, priority));
+                } else {
+                    cout<<Red("ERROR: NO HAY CITAS DISPONIBLES PARA ESA FECHA \n");
+                }
+            }while(isFull);
         } else {
             cout<<Red("ERROR: USTED YA TIENE AGENDADA UNA CITA PENDIENTE \n");
         }
@@ -86,7 +103,7 @@ void CreateAppointment(Patient * patient){
 void CancelAppointment(Patient *patient){
     if(GetIsLogged()) {
         ClearConsole();
-        DeletePatientAppointment(patient->user->username);
+        DeletePatientAppointment(patient);
     }
 }
 
@@ -97,17 +114,39 @@ void ShowMedicalRecords(Patient *patient){
     }
 }
 
-void DeleteMyAccount(Patient *patient){
+void DeletePatientByUsername(string username){
     if(GetIsLogged()) {
         ClearConsole();
-        DeleteAccount(patient->user->username);
+        PatientNode* aux = patientList;
+
+        while (aux != nullptr) {
+            if (aux->patient->user->username == username) {
+                break;
+            }
+
+            aux = aux->next;
+        }
+        if (aux->prev) {
+            aux->prev->next = aux->next;
+        } else {
+            patientList = aux->next;
+        }
+
+        if (aux->next) {
+            aux->next->prev = aux->prev;
+        }
+
+        delete aux;
+        DeleteAccount(username);
     }
 }
 
 
 void NewPatientRegistration(Patient *patient){
     string newPatientPath = PATIENT_DATA_PATH + "/" + patient->user->username;
-    string newPatientInfoPath = newPatientPath + "/" + patient->user->username + "Info.txt";
+    string newPatientInfoPath = newPatientPath + "/" + "Info.txt";
+    string newPatientMedicalRecordPath = newPatientPath + "/" + "HistorialMedico.txt";
+
 
     PatientNode *newPatientNode = new PatientNode;
     PatientNode *aux = GetPatientList();
@@ -128,6 +167,7 @@ void NewPatientRegistration(Patient *patient){
     if(!filesystem::exists(newPatientPath)){
         filesystem::create_directory(newPatientPath);
         ofstream outfile(newPatientInfoPath);
+        ofstream file(newPatientMedicalRecordPath);
         if(outfile.is_open()){
             outfile<<"Nombre: "<<patient->name<<"\n"
             <<"Edad: "<<patient->age<<"\n";

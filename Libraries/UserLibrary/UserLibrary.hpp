@@ -8,6 +8,7 @@
 using namespace std;
 
 struct User{
+    int id;
     string username;
     string password;
     bool isAdmin;
@@ -17,6 +18,8 @@ struct UserNode{
     User *user;
     UserNode *next = nullptr;
 };
+
+bool UserExist(string);
 
 bool CredentialCheck(string, string);
 

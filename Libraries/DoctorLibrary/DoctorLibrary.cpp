@@ -4,6 +4,7 @@
 
 #include "DoctorLibrary.hpp"
 #include "../UtilsLibrary/UtilsLibrary.hpp"
+#include "../AppointmentLibrary/AppointmentLibrary.hpp"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ DoctorNode*GetDoctorList(){
 }
 
 void DoctorMenu(Doctor*doctor){
-    int option;
+    int option = 0;
     while (option != 5) {
         cout << "Que acci" << GetLatinChar().o << "n desea realizar: \n"
              << "1- Crear Paciente \n"
@@ -90,13 +91,19 @@ void DeletePatient(Doctor *doctor){
         cout<<"Ingrese el usuario del paciente a eliminar: ";
         cin>>patientUsername;
 
-        DeleteAccount(patientUsername);
+        DeletePatientByUsername(patientUsername);
     }
 }
 
 void AttendPatient(Doctor *doctor){
     if(GetIsLogged()){
+        int id;
+
         ShowDoctorAppointments(false);
+        cout <<Yellow("Elija el id de la cita a atender: ");
+        cin >> id;
+
+        UpdateAppointment(doctor, id);
     }
 }
 
@@ -109,7 +116,9 @@ void ShowAttendedAppointments(Doctor *doctor){
 void NewDoctorRegistration(Doctor *doctor){
 
     string newDoctorPath = DOCTOR_DATA_PATH + "/" + doctor->user->username;
-    string newDoctorInfoPath = newDoctorPath + "/" + doctor->user->username + "Info.txt";
+    string newDoctorInfoPath = newDoctorPath + "/" + "Info.txt";
+    string doctorAttendedAppointmentPath = newDoctorPath + "/" + "CitasAtendidas.txt";
+
 
     DoctorNode *newDoctorNode = new DoctorNode;
     DoctorNode *aux = GetDoctorList();
@@ -129,7 +138,7 @@ void NewDoctorRegistration(Doctor *doctor){
     if(!filesystem::exists(newDoctorPath)){
         filesystem::create_directory(newDoctorPath);
 
-
+        ofstream file(doctorAttendedAppointmentPath);
         ofstream outfile(newDoctorInfoPath);
         if(outfile.is_open()){
             outfile<<"Nombre: "<<doctor->name<<"\n"
@@ -151,8 +160,7 @@ Doctor *NewDoctor(User*user){
 
     cout<<"Ingrese la especialidad del nuevo doctor \n";
     cout<<"Especialidad: ";
-    cin.get();
-    getline(cin, newDoctor->specialty);
+    cin>>newDoctor->specialty;
 
     newDoctor->user = user;
 
